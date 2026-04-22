@@ -20,14 +20,11 @@ const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     if (!authLoading && user) navigate('/dashboard', { replace: true });
   }, [user, authLoading, navigate]);
-
-  // Le seeding des comptes démo est désormais une opération admin protégée
-  // (cf. supabase/functions/seed-demo-accounts) ; il n'est plus déclenché
-  // automatiquement depuis la page de login publique.
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,11 +36,6 @@ const Auth = () => {
     } else {
       navigate('/dashboard', { replace: true });
     }
-  };
-
-  const useDemoAccount = (acc: typeof DEMO[number]) => {
-    setEmail(acc.email);
-    setPassword('');
   };
 
   return (
