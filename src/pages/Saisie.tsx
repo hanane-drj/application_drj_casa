@@ -27,19 +27,20 @@ import {
 } from '@/components/ui/alert-dialog';
 import {
   Building2, Sparkles, Tent, Trophy, GraduationCap, Landmark,
-  MessageSquare, CheckCircle2, BookOpen, Save, Send, ShieldAlert, Loader2,
+  MessageSquare, CheckCircle2, BookOpen, Save, Send, ShieldAlert, Loader2, Copy,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { FORM_SECTIONS, META_SECTIONS, type SectionDef } from '@/lib/formSchema';
-import { FIELD_LABELS_FR } from '@/lib/excelTemplate';
+import { FIELD_LABELS_FR, SUBMISSION_NUMERIC_FIELDS } from '@/lib/excelTemplate';
 import { useDraftSubmission } from '@/hooks/useDraftSubmission';
 import { NumericField } from '@/components/form/NumericField';
 import { SaveIndicator } from '@/components/form/SaveIndicator';
 import { formatNumber, usePrefName } from '@/lib/data';
+import { YearSwitcher, AVAILABLE_YEARS, DEFAULT_YEAR } from '@/components/YearSwitcher';
 
 const ICONS = { Building2, Sparkles, Tent, Trophy, GraduationCap, Landmark, MessageSquare, CheckCircle2, BookOpen };
 
-const YEAR = 2026;
+
 
 const Saisie = () => {
   const { t, i18n } = useTranslation();
@@ -49,10 +50,12 @@ const Saisie = () => {
   const getName = usePrefName();
   const isAr = i18n.language === 'ar';
 
+  const [year, setYear] = useState<number>(DEFAULT_YEAR);
   const [pref, setPref] = useState<any>(null);
   const [openSections, setOpenSections] = useState<string[]>(['A']);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [duplicating, setDuplicating] = useState(false);
 
   // Charger la préfecture du directeur
   useEffect(() => {
@@ -63,9 +66,42 @@ const Saisie = () => {
 
   const draft = useDraftSubmission({
     prefectureId: profile?.prefecture_id ?? '',
-    year: YEAR,
+    year,
     userId: profile?.id ?? '',
   });
+
+  const handleDuplicateFromPreviousYear = async () => {
+    if (!profile?.prefecture_id) return;
+    const prevYear = year - 1;
+    if (!AVAILABLE_YEARS.includes(prevYear as any)) {
+      toast({ title: t('common.duplicateYearConfirm', { from: prevYear, to: year }), variant: 'destructive' });
+      return;
+    }
+    if (!window.confirm(t('common.duplicateYearConfirm', { from: prevYear, to: year }))) return;
+
+    setDuplicating(true);
+    try {
+      const { data: prevSub } = await supabase
+        .from('submissions')
+        .select('*')
+        .eq('prefecture_id', profile.prefecture_id)
+        .eq('year', prevYear)
+        .maybeSingle();
+      if (!prevSub) {
+        toast({ title: t('form.save.error'), description: `No data for ${prevYear}`, variant: 'destructive' });
+        return;
+      }
+      const patch: any = { comments: prevSub.comments ?? '' };
+      SUBMISSION_NUMERIC_FIELDS.forEach((f) => {
+        patch[f] = Number((prevSub as any)[f] ?? 0);
+      });
+      draft.update(patch);
+      await draft.saveNow();
+      toast({ title: t('common.duplicated', { from: prevYear, to: year }) });
+    } finally {
+      setDuplicating(false);
+    }
+  };
 
   const sectionLabel = (s: SectionDef) => (isAr ? s.titleAr : s.titleFr);
   const fieldLabel = (def: typeof FORM_SECTIONS[number]['fields'][number]) =>
@@ -100,7 +136,7 @@ const Saisie = () => {
     setSubmitting(false);
     setConfirmOpen(false);
     if (ok) {
-      toast({ title: t('form.submit.successTitle'), description: t('form.submit.successBody', { year: YEAR }) });
+      toast({ title: t('form.submit.successTitle'), description: t('form.submit.successBody', { year: year }) });
       setTimeout(() => navigate(`/directions/${profile.prefecture_id}`), 1000);
     } else {
       toast({ title: t('form.submit.errorTitle'), description: draft.errorMsg ?? '', variant: 'destructive' });
@@ -112,20 +148,37 @@ const Saisie = () => {
       <div className="space-y-5 sm:space-y-6 animate-fade-in pb-32">
         {/* Hero compact */}
         <div className="relative overflow-hidden rounded-2xl gradient-hero p-5 sm:p-7 text-primary-foreground shadow-elegant">
-          <div className="relative z-10 space-y-2">
-            <div className="flex items-center gap-2 flex-wrap">
-              <Badge variant="outline" className="bg-white/15 text-white border-0 text-[10px] uppercase tracking-wider">
-                {t('form.eyebrow', { year: YEAR })}
-              </Badge>
-              {isLocked && (
-                <Badge variant="outline" className="bg-success/30 text-white border-0 gap-1">
-                  <CheckCircle2 className="h-3 w-3" />
-                  {t(`status.${draft.status}`)}
+          <div className="relative z-10 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+            <div className="space-y-2 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <Badge variant="outline" className="bg-white/15 text-white border-0 text-[10px] uppercase tracking-wider">
+                  {t('form.eyebrow', { year })}
                 </Badge>
+                {isLocked && (
+                  <Badge variant="outline" className="bg-success/30 text-white border-0 gap-1">
+                    <CheckCircle2 className="h-3 w-3" />
+                    {t(`status.${draft.status}`)}
+                  </Badge>
+                )}
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-extrabold leading-tight">{t('form.title')}</h1>
+              {pref && <p className="text-sm sm:text-base opacity-90">{getName(pref)}</p>}
+            </div>
+            <div className="flex flex-wrap items-center gap-2 flex-shrink-0">
+              <YearSwitcher value={year} onChange={setYear} />
+              {!isLocked && AVAILABLE_YEARS.includes((year - 1) as any) && (
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={handleDuplicateFromPreviousYear}
+                  disabled={duplicating || draft.loading}
+                  className="gap-1.5 bg-white/15 hover:bg-white/25 text-white border-0 backdrop-blur-sm"
+                >
+                  {duplicating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Copy className="h-4 w-4" />}
+                  <span className="hidden sm:inline">{t('common.duplicateYear')}</span>
+                </Button>
               )}
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold leading-tight">{t('form.title')}</h1>
-            {pref && <p className="text-sm sm:text-base opacity-90">{getName(pref)}</p>}
           </div>
           <div className="absolute -top-12 -end-12 w-48 h-48 rounded-full bg-secondary/30 blur-3xl" />
         </div>
@@ -325,7 +378,7 @@ const Saisie = () => {
             <AlertDialogHeader>
               <AlertDialogTitle>{t('form.confirm.title')}</AlertDialogTitle>
               <AlertDialogDescription>
-                {t('form.confirm.body', { year: YEAR, completeness: draft.completeness })}
+                {t('form.confirm.body', { year: year, completeness: draft.completeness })}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>

@@ -18,6 +18,7 @@ import {
 import { computeTotalBeneficiaries, formatNumber, formatDate, usePrefName } from '@/lib/data';
 import { exportDashboardCsv, exportDashboardPdf } from '@/lib/export';
 import { exportDashboardXlsx } from '@/lib/excelExport';
+import { YearSwitcher, DEFAULT_YEAR } from '@/components/YearSwitcher';
 
 const STATUS_STYLE: Record<string, string> = {
   validee: 'bg-success/15 text-success border-success/30',
@@ -39,17 +40,19 @@ const Dashboard = () => {
   const [submissions, setSubmissions] = useState<any[]>([]);
   const [prefectures, setPrefectures] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [year, setYear] = useState<number>(DEFAULT_YEAR);
 
   useEffect(() => {
+    setLoading(true);
     Promise.all([
-      supabase.from('submissions').select('*').eq('year', 2025),
+      supabase.from('submissions').select('*').eq('year', year),
       supabase.from('prefectures').select('*'),
     ]).then(([subs, prefs]) => {
       setSubmissions(subs.data ?? []);
       setPrefectures(prefs.data ?? []);
       setLoading(false);
     });
-  }, []);
+  }, [year]);
 
   // Auto-redirect director vers la saisie 2026 (sa mission principale)
   useEffect(() => {
@@ -121,9 +124,10 @@ const Dashboard = () => {
             <div>
               <p className="text-xs font-semibold uppercase tracking-wider opacity-80">{t('dashboard.welcomeBack', { name: profile?.full_name ?? '' })}</p>
               <h1 className="text-2xl sm:text-3xl font-extrabold mt-2">{t('dashboard.title')}</h1>
-              <p className="text-sm sm:text-base opacity-90 mt-1">{t('dashboard.subtitle', { year: 2025 })}</p>
+              <p className="text-sm sm:text-base opacity-90 mt-1">{t('dashboard.subtitle', { year })}</p>
             </div>
-            <div className="flex gap-2 flex-shrink-0">
+            <div className="flex flex-wrap items-center gap-2 flex-shrink-0">
+              <YearSwitcher value={year} onChange={setYear} />
               <Button
                 size="sm"
                 variant="secondary"
@@ -136,7 +140,7 @@ const Dashboard = () => {
               <Button
                 size="sm"
                 variant="secondary"
-                onClick={() => exportDashboardXlsx(ranking, KPIS.map(k => ({ label: k.label, value: k.value })), i18n.language, t, 2025)}
+                onClick={() => exportDashboardXlsx(ranking, KPIS.map(k => ({ label: k.label, value: k.value })), i18n.language, t, year)}
                 className="gap-1.5 bg-white/15 hover:bg-white/25 text-white border-0 backdrop-blur-sm"
               >
                 <FileSpreadsheet className="h-4 w-4" />
@@ -197,7 +201,7 @@ const Dashboard = () => {
           <Card className="lg:col-span-2 p-5 sm:p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-bold text-foreground">{t('dashboard.ranking')}</h2>
-              <Badge variant="outline" className="text-xs">{t('common.year')} 2025</Badge>
+              <Badge variant="outline" className="text-xs">{t('common.year')} {year}</Badge>
             </div>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={ranking.slice(0, 13).map(r => ({ name: getName(r.pref).split(' ')[0], score: Number(r.global_score) }))}>
