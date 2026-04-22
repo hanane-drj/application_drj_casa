@@ -40,7 +40,7 @@ import { YearSwitcher, AVAILABLE_YEARS, DEFAULT_YEAR } from '@/components/YearSw
 
 const ICONS = { Building2, Sparkles, Tent, Trophy, GraduationCap, Landmark, MessageSquare, CheckCircle2, BookOpen };
 
-const YEAR = 2026;
+
 
 const Saisie = () => {
   const { t, i18n } = useTranslation();
