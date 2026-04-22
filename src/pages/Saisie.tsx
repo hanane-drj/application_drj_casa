@@ -136,7 +136,7 @@ const Saisie = () => {
     setSubmitting(false);
     setConfirmOpen(false);
     if (ok) {
-      toast({ title: t('form.submit.successTitle'), description: t('form.submit.successBody', { year: YEAR }) });
+      toast({ title: t('form.submit.successTitle'), description: t('form.submit.successBody', { year: year }) });
       setTimeout(() => navigate(`/directions/${profile.prefecture_id}`), 1000);
     } else {
       toast({ title: t('form.submit.errorTitle'), description: draft.errorMsg ?? '', variant: 'destructive' });
@@ -151,7 +151,7 @@ const Saisie = () => {
           <div className="relative z-10 space-y-2">
             <div className="flex items-center gap-2 flex-wrap">
               <Badge variant="outline" className="bg-white/15 text-white border-0 text-[10px] uppercase tracking-wider">
-                {t('form.eyebrow', { year: YEAR })}
+                {t('form.eyebrow', { year: year })}
               </Badge>
               {isLocked && (
                 <Badge variant="outline" className="bg-success/30 text-white border-0 gap-1">
@@ -361,7 +361,7 @@ const Saisie = () => {
             <AlertDialogHeader>
               <AlertDialogTitle>{t('form.confirm.title')}</AlertDialogTitle>
               <AlertDialogDescription>
-                {t('form.confirm.body', { year: YEAR, completeness: draft.completeness })}
+                {t('form.confirm.body', { year: year, completeness: draft.completeness })}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
