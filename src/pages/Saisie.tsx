@@ -148,20 +148,37 @@ const Saisie = () => {
       <div className="space-y-5 sm:space-y-6 animate-fade-in pb-32">
         {/* Hero compact */}
         <div className="relative overflow-hidden rounded-2xl gradient-hero p-5 sm:p-7 text-primary-foreground shadow-elegant">
-          <div className="relative z-10 space-y-2">
-            <div className="flex items-center gap-2 flex-wrap">
-              <Badge variant="outline" className="bg-white/15 text-white border-0 text-[10px] uppercase tracking-wider">
-                {t('form.eyebrow', { year: year })}
-              </Badge>
-              {isLocked && (
-                <Badge variant="outline" className="bg-success/30 text-white border-0 gap-1">
-                  <CheckCircle2 className="h-3 w-3" />
-                  {t(`status.${draft.status}`)}
+          <div className="relative z-10 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+            <div className="space-y-2 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <Badge variant="outline" className="bg-white/15 text-white border-0 text-[10px] uppercase tracking-wider">
+                  {t('form.eyebrow', { year })}
                 </Badge>
+                {isLocked && (
+                  <Badge variant="outline" className="bg-success/30 text-white border-0 gap-1">
+                    <CheckCircle2 className="h-3 w-3" />
+                    {t(`status.${draft.status}`)}
+                  </Badge>
+                )}
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-extrabold leading-tight">{t('form.title')}</h1>
+              {pref && <p className="text-sm sm:text-base opacity-90">{getName(pref)}</p>}
+            </div>
+            <div className="flex flex-wrap items-center gap-2 flex-shrink-0">
+              <YearSwitcher value={year} onChange={setYear} />
+              {!isLocked && AVAILABLE_YEARS.includes((year - 1) as any) && (
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={handleDuplicateFromPreviousYear}
+                  disabled={duplicating || draft.loading}
+                  className="gap-1.5 bg-white/15 hover:bg-white/25 text-white border-0 backdrop-blur-sm"
+                >
+                  {duplicating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Copy className="h-4 w-4" />}
+                  <span className="hidden sm:inline">{t('common.duplicateYear')}</span>
+                </Button>
               )}
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold leading-tight">{t('form.title')}</h1>
-            {pref && <p className="text-sm sm:text-base opacity-90">{getName(pref)}</p>}
           </div>
           <div className="absolute -top-12 -end-12 w-48 h-48 rounded-full bg-secondary/30 blur-3xl" />
         </div>
