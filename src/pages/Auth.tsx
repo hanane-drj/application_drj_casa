@@ -75,40 +75,38 @@ const Auth = () => {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password">{t('auth.password')}</Label>
-                <Input id="password" type="password" required value={password} onChange={e => setPassword(e.target.value)} className="h-11" />
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    className="h-11 pe-11"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(s => !s)}
+                    className="absolute end-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    aria-label={showPassword ? t('common.hide') : t('common.show')}
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
               </div>
               <Button type="submit" disabled={loading} className="w-full h-11 gradient-primary hover:opacity-95 text-primary-foreground font-semibold shadow-elegant">
                 {loading ? <><Loader2 className="h-4 w-4 animate-spin me-2" />{t('auth.loading')}</> : t('auth.signIn')}
               </Button>
             </form>
 
-            <div className="mt-6 pt-6 border-t border-border">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('auth.demoAccounts')}</span>
-              </div>
-              <p className="text-xs text-muted-foreground mb-3">{t('auth.demoBanner')}</p>
-              <div className="space-y-2">
-                {DEMO.map(acc => {
-                  const Icon = acc.icon;
-                  return (
-                    <button
-                      key={acc.email}
-                      type="button"
-                      onClick={() => useDemoAccount(acc)}
-                      className="w-full flex items-center gap-3 p-3 rounded-lg border border-border hover:border-primary hover:bg-primary-soft/40 transition-smooth text-start"
-                    >
-                      <div className={`h-9 w-9 rounded-lg bg-muted flex items-center justify-center ${acc.color}`}>
-                        <Icon className="h-4 w-4" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-sm font-semibold text-foreground truncate">{t(`roles.${acc.roleKey}`)}</div>
-                        <div className="text-xs text-muted-foreground truncate">{acc.email}</div>
-                      </div>
-                      <span className="text-[10px] text-muted-foreground">→</span>
-                    </button>
-                  );
-                })}
-              </div>
+            <div className="mt-6 pt-6 border-t border-border text-center">
+              <Link
+                to="/admin/provision"
+                className="inline-flex items-center gap-2 text-xs text-muted-foreground hover:text-primary transition-smooth"
+              >
+                <ShieldCheck className="h-3.5 w-3.5" />
+                {t('provision.title')}
+              </Link>
             </div>
           </Card>
         </div>
