@@ -140,7 +140,7 @@ const Dashboard = () => {
               <Button
                 size="sm"
                 variant="secondary"
-                onClick={() => exportDashboardXlsx(ranking, KPIS.map(k => ({ label: k.label, value: k.value })), i18n.language, t, 2025)}
+                onClick={() => exportDashboardXlsx(ranking, KPIS.map(k => ({ label: k.label, value: k.value })), i18n.language, t, year)}
                 className="gap-1.5 bg-white/15 hover:bg-white/25 text-white border-0 backdrop-blur-sm"
               >
                 <FileSpreadsheet className="h-4 w-4" />
@@ -201,7 +201,7 @@ const Dashboard = () => {
           <Card className="lg:col-span-2 p-5 sm:p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-bold text-foreground">{t('dashboard.ranking')}</h2>
-              <Badge variant="outline" className="text-xs">{t('common.year')} 2025</Badge>
+              <Badge variant="outline" className="text-xs">{t('common.year')} {year}</Badge>
             </div>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={ranking.slice(0, 13).map(r => ({ name: getName(r.pref).split(' ')[0], score: Number(r.global_score) }))}>
