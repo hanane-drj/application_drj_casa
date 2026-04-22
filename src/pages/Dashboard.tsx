@@ -18,6 +18,7 @@ import {
 import { computeTotalBeneficiaries, formatNumber, formatDate, usePrefName } from '@/lib/data';
 import { exportDashboardCsv, exportDashboardPdf } from '@/lib/export';
 import { exportDashboardXlsx } from '@/lib/excelExport';
+import { YearSwitcher, DEFAULT_YEAR } from '@/components/YearSwitcher';
 
 const STATUS_STYLE: Record<string, string> = {
   validee: 'bg-success/15 text-success border-success/30',
@@ -39,17 +40,19 @@ const Dashboard = () => {
   const [submissions, setSubmissions] = useState<any[]>([]);
   const [prefectures, setPrefectures] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [year, setYear] = useState<number>(DEFAULT_YEAR);
 
   useEffect(() => {
+    setLoading(true);
     Promise.all([
-      supabase.from('submissions').select('*').eq('year', 2025),
+      supabase.from('submissions').select('*').eq('year', year),
       supabase.from('prefectures').select('*'),
     ]).then(([subs, prefs]) => {
       setSubmissions(subs.data ?? []);
       setPrefectures(prefs.data ?? []);
       setLoading(false);
     });
-  }, []);
+  }, [year]);
 
   // Auto-redirect director vers la saisie 2026 (sa mission principale)
   useEffect(() => {
