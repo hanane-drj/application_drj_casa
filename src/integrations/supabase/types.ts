@@ -14,16 +14,243 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      prefectures: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          name_ar: string
+          name_fr: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          name_ar: string
+          name_fr: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          name_ar?: string
+          name_fr?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          prefecture_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          full_name: string
+          id: string
+          prefecture_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          prefecture_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_prefecture_id_fkey"
+            columns: ["prefecture_id"]
+            isOneToOne: false
+            referencedRelation: "prefectures"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      submissions: {
+        Row: {
+          camping_associations: number | null
+          camping_facilitators: number | null
+          camping_female: number | null
+          camping_male: number | null
+          camping_participants: number | null
+          camping_rural: number | null
+          camping_trainings: number | null
+          camping_urban: number | null
+          comments: string | null
+          completeness_pct: number | null
+          created_at: string
+          festivals_count: number | null
+          festivals_participants: number | null
+          festivals_qualified: number | null
+          global_score: number | null
+          id: string
+          inst_dispute: number | null
+          inst_in_progress: number | null
+          inst_rehab_needs: number | null
+          inst_updated: number | null
+          integration_beneficiaries: number | null
+          integration_partners: number | null
+          integration_trainings: number | null
+          outreach_capacity: number | null
+          outreach_cultural: number | null
+          outreach_educative: number | null
+          outreach_sportive: number | null
+          perm_associations: number | null
+          perm_capacity: number | null
+          perm_clubs: number | null
+          perm_conventions: number | null
+          perm_cultural: number | null
+          perm_educative: number | null
+          perm_sportive: number | null
+          prefecture_id: string
+          status: Database["public"]["Enums"]["submission_status"]
+          submitted_at: string | null
+          submitted_by: string | null
+          updated_at: string
+          year: number
+        }
+        Insert: {
+          camping_associations?: number | null
+          camping_facilitators?: number | null
+          camping_female?: number | null
+          camping_male?: number | null
+          camping_participants?: number | null
+          camping_rural?: number | null
+          camping_trainings?: number | null
+          camping_urban?: number | null
+          comments?: string | null
+          completeness_pct?: number | null
+          created_at?: string
+          festivals_count?: number | null
+          festivals_participants?: number | null
+          festivals_qualified?: number | null
+          global_score?: number | null
+          id?: string
+          inst_dispute?: number | null
+          inst_in_progress?: number | null
+          inst_rehab_needs?: number | null
+          inst_updated?: number | null
+          integration_beneficiaries?: number | null
+          integration_partners?: number | null
+          integration_trainings?: number | null
+          outreach_capacity?: number | null
+          outreach_cultural?: number | null
+          outreach_educative?: number | null
+          outreach_sportive?: number | null
+          perm_associations?: number | null
+          perm_capacity?: number | null
+          perm_clubs?: number | null
+          perm_conventions?: number | null
+          perm_cultural?: number | null
+          perm_educative?: number | null
+          perm_sportive?: number | null
+          prefecture_id: string
+          status?: Database["public"]["Enums"]["submission_status"]
+          submitted_at?: string | null
+          submitted_by?: string | null
+          updated_at?: string
+          year: number
+        }
+        Update: {
+          camping_associations?: number | null
+          camping_facilitators?: number | null
+          camping_female?: number | null
+          camping_male?: number | null
+          camping_participants?: number | null
+          camping_rural?: number | null
+          camping_trainings?: number | null
+          camping_urban?: number | null
+          comments?: string | null
+          completeness_pct?: number | null
+          created_at?: string
+          festivals_count?: number | null
+          festivals_participants?: number | null
+          festivals_qualified?: number | null
+          global_score?: number | null
+          id?: string
+          inst_dispute?: number | null
+          inst_in_progress?: number | null
+          inst_rehab_needs?: number | null
+          inst_updated?: number | null
+          integration_beneficiaries?: number | null
+          integration_partners?: number | null
+          integration_trainings?: number | null
+          outreach_capacity?: number | null
+          outreach_cultural?: number | null
+          outreach_educative?: number | null
+          outreach_sportive?: number | null
+          perm_associations?: number | null
+          perm_capacity?: number | null
+          perm_clubs?: number | null
+          perm_conventions?: number | null
+          perm_cultural?: number | null
+          perm_educative?: number | null
+          perm_sportive?: number | null
+          prefecture_id?: string
+          status?: Database["public"]["Enums"]["submission_status"]
+          submitted_at?: string | null
+          submitted_by?: string | null
+          updated_at?: string
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "submissions_prefecture_id_fkey"
+            columns: ["prefecture_id"]
+            isOneToOne: false
+            referencedRelation: "prefectures"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_roles: {
+        Args: { _user_id: string }
+        Returns: Database["public"]["Enums"]["app_role"][]
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin_regional" | "equipe_regionale" | "directeur_prefectoral"
+      submission_status: "brouillon" | "soumise" | "validee"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +377,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin_regional", "equipe_regionale", "directeur_prefectoral"],
+      submission_status: ["brouillon", "soumise", "validee"],
+    },
   },
 } as const
