@@ -124,9 +124,10 @@ const Dashboard = () => {
             <div>
               <p className="text-xs font-semibold uppercase tracking-wider opacity-80">{t('dashboard.welcomeBack', { name: profile?.full_name ?? '' })}</p>
               <h1 className="text-2xl sm:text-3xl font-extrabold mt-2">{t('dashboard.title')}</h1>
-              <p className="text-sm sm:text-base opacity-90 mt-1">{t('dashboard.subtitle', { year: 2025 })}</p>
+              <p className="text-sm sm:text-base opacity-90 mt-1">{t('dashboard.subtitle', { year })}</p>
             </div>
-            <div className="flex gap-2 flex-shrink-0">
+            <div className="flex flex-wrap items-center gap-2 flex-shrink-0">
+              <YearSwitcher value={year} onChange={setYear} />
               <Button
                 size="sm"
                 variant="secondary"
