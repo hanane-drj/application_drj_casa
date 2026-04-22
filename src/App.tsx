@@ -14,6 +14,8 @@ import Directions from "./pages/Directions.tsx";
 import DirectionDetail from "./pages/DirectionDetail.tsx";
 import RegionMapPage from "./pages/RegionMapPage.tsx";
 import Saisie from "./pages/Saisie.tsx";
+import ImportExcel from "./pages/ImportExcel.tsx";
+import Provision from "./pages/Provision.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -33,7 +35,10 @@ const App = () => (
             <Route path="/directions/:id" element={<ProtectedRoute><DirectionDetail /></ProtectedRoute>} />
             <Route path="/carte" element={<ProtectedRoute><RegionMapPage /></ProtectedRoute>} />
             <Route path="/saisie" element={<ProtectedRoute><Saisie /></ProtectedRoute>} />
+            <Route path="/import" element={<ProtectedRoute><ImportExcel /></ProtectedRoute>} />
+            <Route path="/admin/provision" element={<Provision />} />
             <Route path="*" element={<NotFound />} />
+          </Routes>
           </Routes>
         </AuthProvider>
       </BrowserRouter>
