@@ -1,1 +1,4 @@
 project_id = "punsprkezslhmhvvavtq"
+
+[functions.provision-users]
+verify_jwt = false
