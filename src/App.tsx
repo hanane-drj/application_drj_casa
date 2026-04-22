@@ -39,7 +39,6 @@ const App = () => (
             <Route path="/admin/provision" element={<Provision />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
-          </Routes>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
