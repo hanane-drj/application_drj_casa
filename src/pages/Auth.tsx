@@ -10,15 +10,8 @@ import { Card } from '@/components/ui/card';
 import { Brand, BrandMark } from '@/components/Brand';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { toast } from 'sonner';
-import { Shield, Users, User as UserIcon, Loader2, Sparkles } from 'lucide-react';
-
-// Pré-remplit uniquement l'email — le mot de passe est communiqué hors-bande
-// (admin du déploiement) pour éviter qu'un visiteur anonyme prenne le contrôle.
-const DEMO = [
-  { email: 'admin@drj-cs.ma', roleKey: 'admin_regional' as const, icon: Shield, color: 'text-primary' },
-  { email: 'equipe@drj-cs.ma', roleKey: 'equipe_regionale' as const, icon: Users, color: 'text-info' },
-  { email: 'directeur@drj-cs.ma', roleKey: 'directeur_prefectoral' as const, icon: UserIcon, color: 'text-secondary' },
-];
+import { Loader2, Sparkles, Eye, EyeOff, ShieldCheck } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Auth = () => {
   const { t } = useTranslation();
