@@ -73,6 +73,220 @@ export type Database = {
           },
         ]
       }
+      submission_associations: {
+        Row: {
+          created_at: string
+          domain: string | null
+          id: string
+          motif: string | null
+          movement_date: string | null
+          movement_type: string
+          name: string
+          submission_id: string
+        }
+        Insert: {
+          created_at?: string
+          domain?: string | null
+          id?: string
+          motif?: string | null
+          movement_date?: string | null
+          movement_type: string
+          name: string
+          submission_id: string
+        }
+        Update: {
+          created_at?: string
+          domain?: string | null
+          id?: string
+          motif?: string | null
+          movement_date?: string | null
+          movement_type?: string
+          name?: string
+          submission_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "submission_associations_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      submission_camps: {
+        Row: {
+          boys: number
+          camp_type: string | null
+          created_at: string
+          facilitators: number
+          facilitators_trained: number
+          girls: number
+          id: string
+          name: string
+          rural: number
+          submission_id: string
+          urban: number
+        }
+        Insert: {
+          boys?: number
+          camp_type?: string | null
+          created_at?: string
+          facilitators?: number
+          facilitators_trained?: number
+          girls?: number
+          id?: string
+          name: string
+          rural?: number
+          submission_id: string
+          urban?: number
+        }
+        Update: {
+          boys?: number
+          camp_type?: string | null
+          created_at?: string
+          facilitators?: number
+          facilitators_trained?: number
+          girls?: number
+          id?: string
+          name?: string
+          rural?: number
+          submission_id?: string
+          urban?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "submission_camps_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      submission_festivals: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          participants: number
+          qualified: number
+          submission_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          participants?: number
+          qualified?: number
+          submission_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          participants?: number
+          qualified?: number
+          submission_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "submission_festivals_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      submission_indicators: {
+        Row: {
+          actual_value: number
+          created_at: string
+          id: string
+          label: string
+          program: string
+          submission_id: string
+          target_value: number
+        }
+        Insert: {
+          actual_value?: number
+          created_at?: string
+          id?: string
+          label: string
+          program: string
+          submission_id: string
+          target_value?: number
+        }
+        Update: {
+          actual_value?: number
+          created_at?: string
+          id?: string
+          label?: string
+          program?: string
+          submission_id?: string
+          target_value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "submission_indicators_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      submission_socioeco: {
+        Row: {
+          activity_type: string | null
+          created_at: string
+          duration: string | null
+          id: string
+          men: number
+          partner: string | null
+          rural_pct: number
+          subject: string
+          submission_id: string
+          urban_pct: number
+          women: number
+        }
+        Insert: {
+          activity_type?: string | null
+          created_at?: string
+          duration?: string | null
+          id?: string
+          men?: number
+          partner?: string | null
+          rural_pct?: number
+          subject: string
+          submission_id: string
+          urban_pct?: number
+          women?: number
+        }
+        Update: {
+          activity_type?: string | null
+          created_at?: string
+          duration?: string | null
+          id?: string
+          men?: number
+          partner?: string | null
+          rural_pct?: number
+          subject?: string
+          submission_id?: string
+          urban_pct?: number
+          women?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "submission_socioeco_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       submissions: {
         Row: {
           camping_associations: number | null
@@ -86,6 +300,7 @@ export type Database = {
           comments: string | null
           completeness_pct: number | null
           created_at: string
+          director_name: string | null
           festivals_count: number | null
           festivals_participants: number | null
           festivals_qualified: number | null
@@ -102,6 +317,7 @@ export type Database = {
           outreach_cultural: number | null
           outreach_educative: number | null
           outreach_sportive: number | null
+          period: Database["public"]["Enums"]["submission_period"]
           perm_associations: number | null
           perm_capacity: number | null
           perm_clubs: number | null
@@ -110,6 +326,7 @@ export type Database = {
           perm_educative: number | null
           perm_sportive: number | null
           prefecture_id: string
+          report_date: string | null
           status: Database["public"]["Enums"]["submission_status"]
           submitted_at: string | null
           submitted_by: string | null
@@ -128,6 +345,7 @@ export type Database = {
           comments?: string | null
           completeness_pct?: number | null
           created_at?: string
+          director_name?: string | null
           festivals_count?: number | null
           festivals_participants?: number | null
           festivals_qualified?: number | null
@@ -144,6 +362,7 @@ export type Database = {
           outreach_cultural?: number | null
           outreach_educative?: number | null
           outreach_sportive?: number | null
+          period?: Database["public"]["Enums"]["submission_period"]
           perm_associations?: number | null
           perm_capacity?: number | null
           perm_clubs?: number | null
@@ -152,6 +371,7 @@ export type Database = {
           perm_educative?: number | null
           perm_sportive?: number | null
           prefecture_id: string
+          report_date?: string | null
           status?: Database["public"]["Enums"]["submission_status"]
           submitted_at?: string | null
           submitted_by?: string | null
@@ -170,6 +390,7 @@ export type Database = {
           comments?: string | null
           completeness_pct?: number | null
           created_at?: string
+          director_name?: string | null
           festivals_count?: number | null
           festivals_participants?: number | null
           festivals_qualified?: number | null
@@ -186,6 +407,7 @@ export type Database = {
           outreach_cultural?: number | null
           outreach_educative?: number | null
           outreach_sportive?: number | null
+          period?: Database["public"]["Enums"]["submission_period"]
           perm_associations?: number | null
           perm_capacity?: number | null
           perm_clubs?: number | null
@@ -194,6 +416,7 @@ export type Database = {
           perm_educative?: number | null
           perm_sportive?: number | null
           prefecture_id?: string
+          report_date?: string | null
           status?: Database["public"]["Enums"]["submission_status"]
           submitted_at?: string | null
           submitted_by?: string | null
@@ -247,9 +470,14 @@ export type Database = {
         }
         Returns: boolean
       }
+      user_owns_submission: {
+        Args: { _submission_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "admin_regional" | "equipe_regionale" | "directeur_prefectoral"
+      submission_period: "annuelle" | "trimestrielle"
       submission_status: "brouillon" | "soumise" | "validee"
     }
     CompositeTypes: {
@@ -379,6 +607,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin_regional", "equipe_regionale", "directeur_prefectoral"],
+      submission_period: ["annuelle", "trimestrielle"],
       submission_status: ["brouillon", "soumise", "validee"],
     },
   },

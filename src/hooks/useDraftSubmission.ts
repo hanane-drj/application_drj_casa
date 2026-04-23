@@ -7,6 +7,9 @@ export type SaveState = 'idle' | 'saving' | 'saved' | 'error';
 
 export interface DraftValues extends Partial<Record<SubmissionNumericField, number>> {
   comments?: string | null;
+  director_name?: string | null;
+  report_date?: string | null;
+  period?: 'annuelle' | 'trimestrielle';
 }
 
 interface UseDraftOpts {
@@ -47,7 +50,12 @@ export const useDraftSubmission = ({ prefectureId, year, userId, debounceMs = 20
         if (data) {
           setSubmissionId(data.id);
           setStatus(data.status);
-          const init: DraftValues = { comments: data.comments ?? '' };
+          const init: DraftValues = {
+            comments: data.comments ?? '',
+            director_name: (data as any).director_name ?? '',
+            report_date: (data as any).report_date ?? '',
+            period: (data as any).period ?? 'annuelle',
+          };
           SUBMISSION_NUMERIC_FIELDS.forEach(f => {
             init[f] = Number((data as any)[f] ?? 0);
           });
@@ -84,6 +92,9 @@ export const useDraftSubmission = ({ prefectureId, year, userId, debounceMs = 20
       submitted_by: userId,
       completeness_pct,
       global_score,
+      ...(next.director_name !== undefined ? { director_name: next.director_name } : {}),
+      ...(next.report_date !== undefined ? { report_date: next.report_date } : {}),
+      ...(next.period !== undefined ? { period: next.period } : {}),
       ...numericPayload,
     } as any;
 
@@ -140,6 +151,9 @@ export const useDraftSubmission = ({ prefectureId, year, userId, debounceMs = 20
       submitted_at: new Date().toISOString(),
       completeness_pct,
       global_score,
+      ...(values.director_name !== undefined ? { director_name: values.director_name } : {}),
+      ...(values.report_date !== undefined ? { report_date: values.report_date } : {}),
+      ...(values.period !== undefined ? { period: values.period } : {}),
       ...numericPayload,
     };
     const op = submissionId
