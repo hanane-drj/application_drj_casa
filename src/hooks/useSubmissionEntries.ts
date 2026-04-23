@@ -29,7 +29,7 @@ export function useSubmissionEntries<T extends { id?: string }>(
       .eq('submission_id', submissionId)
       .order('created_at', { ascending: true })
       .then(({ data }) => {
-        setItems((data as T[]) ?? []);
+        setItems(((data as unknown) as T[]) ?? []);
         setLoading(false);
       });
   }, [table, submissionId]);
