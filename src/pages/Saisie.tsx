@@ -22,7 +22,10 @@ import { SaveIndicator } from '@/components/form/SaveIndicator';
 import { Stepper, type Step } from '@/components/form/Stepper';
 import { Step1Identification, type IdentificationData } from '@/components/wizard/Step1Identification';
 import { Step2Permanent, type AssociationEntry } from '@/components/wizard/Step2Permanent';
-import { StepPlaceholder } from '@/components/wizard/StepPlaceholder';
+import { Step3Outreach } from '@/components/wizard/Step3Outreach';
+import { Step4CampsFestivals, type CampEntry, type FestivalEntry } from '@/components/wizard/Step4CampsFestivals';
+import { Step5SocioFacilities, type SocioEcoEntry } from '@/components/wizard/Step5SocioFacilities';
+import { Step6Indicators, type IndicatorEntry } from '@/components/wizard/Step6Indicators';
 import { usePrefName } from '@/lib/data';
 import { DEFAULT_YEAR } from '@/components/YearSwitcher';
 
@@ -88,8 +91,22 @@ const Saisie = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [draft.loading, draft.submissionId]);
 
-  // Multi-entry: associations
+  // Multi-entry tables
   const assocs = useSubmissionEntries<AssociationEntry>('submission_associations', draft.submissionId);
+  const camps = useSubmissionEntries<CampEntry>('submission_camps', draft.submissionId);
+  const fests = useSubmissionEntries<FestivalEntry>('submission_festivals', draft.submissionId);
+  const socios = useSubmissionEntries<SocioEcoEntry>('submission_socioeco', draft.submissionId);
+  const indics = useSubmissionEntries<IndicatorEntry>('submission_indicators', draft.submissionId);
+
+  const persistAllChildren = async (subId: string) => {
+    await Promise.all([
+      assocs.persistAll(subId),
+      camps.persistAll(subId),
+      fests.persistAll(subId),
+      socios.persistAll(subId),
+      indics.persistAll(subId),
+    ]);
+  };
 
   if (authLoading) {
     return (
@@ -119,7 +136,7 @@ const Saisie = () => {
       period: meta.period,
     } as any);
     const ok = await draft.saveNow();
-    if (ok && draft.submissionId) await assocs.persistAll(draft.submissionId);
+    if (ok && draft.submissionId) await persistAllChildren(draft.submissionId);
     if (ok) toast({ title: t('form.save.draftSavedTitle') });
     else toast({ title: t('form.save.draftErrorTitle'), variant: 'destructive' });
   };
@@ -132,7 +149,7 @@ const Saisie = () => {
       period: meta.period,
     } as any);
     const ok = await draft.submit();
-    if (ok && draft.submissionId) await assocs.persistAll(draft.submissionId);
+    if (ok && draft.submissionId) await persistAllChildren(draft.submissionId);
     setSubmitting(false);
     setConfirmOpen(false);
     if (ok) {
@@ -222,10 +239,50 @@ const Saisie = () => {
                 disabled={isLocked}
               />
             )}
-            {step === 3 && <StepPlaceholder titleFr="Activités rayonnantes" titleAr="الأنشطة الإشعاعية" isAr={isAr} />}
-            {step === 4 && <StepPlaceholder titleFr="Camping & Festivals" titleAr="التخييم والمهرجانات" isAr={isAr} />}
-            {step === 5 && <StepPlaceholder titleFr="Socio-économique & Établissements" titleAr="سوسيو-اقتصادي والمؤسسات" isAr={isAr} />}
-            {step === 6 && <StepPlaceholder titleFr="Indicateurs & Commentaires" titleAr="المؤشرات والتعليقات" isAr={isAr} />}
+            {step === 3 && (
+              <Step3Outreach
+                values={draft.values}
+                onUpdate={(p) => draft.update(p)}
+                disabled={isLocked}
+              />
+            )}
+            {step === 4 && (
+              <Step4CampsFestivals
+                camps={camps.items}
+                onAddCamp={camps.add}
+                onUpdateCamp={camps.update}
+                onRemoveCamp={camps.remove}
+                festivals={fests.items}
+                onAddFestival={fests.add}
+                onUpdateFestival={fests.update}
+                onRemoveFestival={fests.remove}
+                disabled={isLocked}
+              />
+            )}
+            {step === 5 && (
+              <Step5SocioFacilities
+                values={draft.values}
+                onUpdate={(p) => draft.update(p)}
+                socioeco={socios.items}
+                onAddSocio={socios.add}
+                onUpdateSocio={socios.update}
+                onRemoveSocio={socios.remove}
+                disabled={isLocked}
+              />
+            )}
+            {step === 6 && (
+              <Step6Indicators
+                values={draft.values}
+                onUpdate={(p) => draft.update(p)}
+                indicators={indics.items}
+                onAddIndicator={indics.add}
+                onUpdateIndicator={indics.update}
+                onRemoveIndicator={indics.remove}
+                completeness={draft.completeness}
+                globalScore={draft.globalScore}
+                disabled={isLocked}
+              />
+            )}
           </>
         )}
 
