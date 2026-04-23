@@ -25,7 +25,7 @@ import { Step2Permanent, type AssociationEntry } from '@/components/wizard/Step2
 import { Step3Outreach } from '@/components/wizard/Step3Outreach';
 import { Step4CampsFestivals, type CampEntry, type FestivalEntry } from '@/components/wizard/Step4CampsFestivals';
 import { Step5SocioFacilities, type SocioEcoEntry } from '@/components/wizard/Step5SocioFacilities';
-import { Step6Indicators, type IndicatorEntry } from '@/components/wizard/Step6Indicators';
+import { Step6Indicators } from '@/components/wizard/Step6Indicators';
 import { usePrefName } from '@/lib/data';
 import { DEFAULT_YEAR } from '@/components/YearSwitcher';
 
@@ -35,7 +35,7 @@ const STEPS: Step[] = [
   { id: 3, labelFr: 'Rayonnantes', labelAr: 'الإشعاعية' },
   { id: 4, labelFr: 'Camping & Festivals', labelAr: 'تخييم ومهرجانات' },
   { id: 5, labelFr: 'Socio-éco & Étab.', labelAr: 'سوسيو-اقتصادي ومؤسسات' },
-  { id: 6, labelFr: 'Indicateurs', labelAr: 'المؤشرات' },
+  { id: 6, labelFr: 'Commentaires & Résumé', labelAr: 'التعليقات والملخص' },
 ];
 
 const Saisie = () => {
@@ -96,7 +96,6 @@ const Saisie = () => {
   const camps = useSubmissionEntries<CampEntry>('submission_camps', draft.submissionId);
   const fests = useSubmissionEntries<FestivalEntry>('submission_festivals', draft.submissionId);
   const socios = useSubmissionEntries<SocioEcoEntry>('submission_socioeco', draft.submissionId);
-  const indics = useSubmissionEntries<IndicatorEntry>('submission_indicators', draft.submissionId);
 
   const persistAllChildren = async (subId: string) => {
     await Promise.all([
@@ -104,7 +103,6 @@ const Saisie = () => {
       camps.persistAll(subId),
       fests.persistAll(subId),
       socios.persistAll(subId),
-      indics.persistAll(subId),
     ]);
   };
 
@@ -154,7 +152,7 @@ const Saisie = () => {
     setConfirmOpen(false);
     if (ok) {
       toast({ title: t('form.submit.successTitle'), description: t('form.submit.successBody', { year }) });
-      setTimeout(() => navigate(`/directions/${profile.prefecture_id}`), 1000);
+      setTimeout(() => navigate('/dashboard'), 800);
     } else {
       toast({ title: t('form.submit.errorTitle'), description: draft.errorMsg ?? '', variant: 'destructive' });
     }
@@ -274,10 +272,6 @@ const Saisie = () => {
               <Step6Indicators
                 values={draft.values}
                 onUpdate={(p) => draft.update(p)}
-                indicators={indics.items}
-                onAddIndicator={indics.add}
-                onUpdateIndicator={indics.update}
-                onRemoveIndicator={indics.remove}
                 completeness={draft.completeness}
                 globalScore={draft.globalScore}
                 disabled={isLocked}
