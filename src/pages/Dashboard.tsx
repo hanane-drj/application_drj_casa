@@ -102,8 +102,9 @@ const Dashboard = () => {
     { name: t('detail.integration'), value: submissions.reduce((a, s) => a + (s.integration_beneficiaries ?? 0), 0), color: 'hsl(var(--success))' },
   ];
 
+  const totalPrefs = isDirector ? 1 : (prefectures.length || 13);
   const KPIS = [
-    { icon: Building2, label: t('dashboard.kpi.submitted'), value: `${submitted}/13`, tone: 1 },
+    { icon: Building2, label: t('dashboard.kpi.submitted'), value: `${submitted}/${totalPrefs}`, tone: 1 },
     { icon: TrendingUp, label: t('dashboard.kpi.completeness'), value: `${avgCompleteness.toFixed(1)}%`, tone: 2 },
     { icon: Users, label: t('dashboard.kpi.beneficiaries'), value: formatNumber(totalBeneficiaries, i18n.language), tone: 3 },
     { icon: Sparkles, label: t('dashboard.kpi.associations'), value: formatNumber(totalAssoc, i18n.language), tone: 4 },

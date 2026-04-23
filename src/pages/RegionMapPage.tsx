@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 import { AppLayout } from '@/components/AppLayout';
 import { LeafletMap } from '@/components/LeafletMap';
 import { Card } from '@/components/ui/card';
@@ -10,21 +11,26 @@ import { MapPin, TrendingUp, Award } from 'lucide-react';
 
 const RegionMapPage = () => {
   const { t, i18n } = useTranslation();
+  const { profile, isDirector } = useAuth();
   const getName = usePrefName();
   const [submissions, setSubmissions] = useState<any[]>([]);
   const [prefectures, setPrefectures] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let subQuery = supabase.from('submissions').select('*').eq('year', 2025);
+    if (isDirector && profile?.prefecture_id) {
+      subQuery = subQuery.eq('prefecture_id', profile.prefecture_id);
+    }
     Promise.all([
-      supabase.from('submissions').select('*').eq('year', 2025),
+      subQuery,
       supabase.from('prefectures').select('*'),
     ]).then(([subs, prefs]) => {
       setSubmissions(subs.data ?? []);
       setPrefectures(prefs.data ?? []);
       setLoading(false);
     });
-  }, []);
+  }, [isDirector, profile?.prefecture_id]);
 
   if (loading) {
     return (

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 import { AppLayout } from '@/components/AppLayout';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -18,16 +19,20 @@ const STATUS_STYLE: Record<string, string> = {
 
 const Directions = () => {
   const { t, i18n } = useTranslation();
+  const { profile, isDirector } = useAuth();
   const getName = usePrefName();
   const navigate = useNavigate();
   const [data, setData] = useState<any[]>([]);
   const [search, setSearch] = useState('');
 
   useEffect(() => {
-    Promise.all([
-      supabase.from('prefectures').select('*'),
-      supabase.from('submissions').select('*').eq('year', 2025),
-    ]).then(([p, s]) => {
+    let prefQuery = supabase.from('prefectures').select('*');
+    let subQuery = supabase.from('submissions').select('*').eq('year', 2025);
+    if (isDirector && profile?.prefecture_id) {
+      prefQuery = prefQuery.eq('id', profile.prefecture_id);
+      subQuery = subQuery.eq('prefecture_id', profile.prefecture_id);
+    }
+    Promise.all([prefQuery, subQuery]).then(([p, s]) => {
       const subs = new Map((s.data ?? []).map((x: any) => [x.prefecture_id, x]));
       const merged = (p.data ?? []).map((pref: any) => ({
         pref,
@@ -35,7 +40,7 @@ const Directions = () => {
       }));
       setData(merged);
     });
-  }, []);
+  }, [isDirector, profile?.prefecture_id]);
 
   const filtered = data.filter(d =>
     !search ||
