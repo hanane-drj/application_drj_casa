@@ -24,9 +24,9 @@ export const AppLayout = ({ children }: { children: ReactNode }) => {
 
   const navItems = [
     { path: '/saisie', label: t('nav.entry'), icon: FilePlus2, show: isDirector },
-    { path: '/dashboard', label: t('nav.overview'), icon: LayoutDashboard, show: !isDirector },
-    { path: '/carte', label: t('nav.map'), icon: Map, show: !isDirector },
-    { path: '/directions', label: t('nav.directions'), icon: Building2, show: !isDirector },
+    { path: '/dashboard', label: t('nav.overview'), icon: LayoutDashboard, show: true },
+    { path: '/carte', label: t('nav.map'), icon: Map, show: true },
+    { path: '/directions', label: t('nav.directions'), icon: Building2, show: true },
   ];
 
   const initials = (profile?.full_name ?? '?')

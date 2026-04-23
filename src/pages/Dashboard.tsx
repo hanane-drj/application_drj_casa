@@ -44,22 +44,20 @@ const Dashboard = () => {
 
   useEffect(() => {
     setLoading(true);
+    let subQuery = supabase.from('submissions').select('*').eq('year', year);
+    // Directors only see their own prefecture's data
+    if (isDirector && profile?.prefecture_id) {
+      subQuery = subQuery.eq('prefecture_id', profile.prefecture_id);
+    }
     Promise.all([
-      supabase.from('submissions').select('*').eq('year', year),
+      subQuery,
       supabase.from('prefectures').select('*'),
     ]).then(([subs, prefs]) => {
       setSubmissions(subs.data ?? []);
       setPrefectures(prefs.data ?? []);
       setLoading(false);
     });
-  }, [year]);
-
-  // Auto-redirect director vers la saisie 2026 (sa mission principale)
-  useEffect(() => {
-    if (isDirector && profile?.prefecture_id) {
-      navigate('/saisie', { replace: true });
-    }
-  }, [isDirector, profile, navigate]);
+  }, [year, isDirector, profile?.prefecture_id]);
 
   if (loading) {
     return (
