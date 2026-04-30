@@ -21,7 +21,17 @@
     "loading": "Connexion en cours…",
     "errorInvalid": "Identifiants invalides",
     "errorGeneric": "Une erreur est survenue",
-    "demoBanner": "Cliquez sur un compte ci-dessous pour pré-remplir le formulaire."
+    "demoBanner": "Cliquez sur un compte ci-dessous pour pré-remplir le formulaire.",
+    "demoAccess": "Accès démo (aperçu)",
+    "forgotPassword": "Mot de passe oublié ?",
+    "forgot": {
+      "title": "Mot de passe oublié",
+      "subtitle": "Saisissez votre adresse e-mail pour recevoir un lien de réinitialisation.",
+      "send": "Envoyer le lien de réinitialisation",
+      "sent": "Un lien de réinitialisation a été envoyé à votre adresse e-mail.",
+      "sentToast": "E-mail envoyé",
+      "backToLogin": "Retour à la connexion"
+    }
   },
   "nav": {
     "overview": "Vue d'ensemble",
