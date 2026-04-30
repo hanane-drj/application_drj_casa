@@ -93,10 +93,26 @@ const Auth = () => {
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
+                <div className="text-end">
+                  <Link to="/forgot-password" className="text-xs text-primary hover:underline font-medium">
+                    {t('auth.forgotPassword')}
+                  </Link>
+                </div>
               </div>
               <Button type="submit" disabled={loading} className="w-full h-11 gradient-primary hover:opacity-95 text-primary-foreground font-semibold shadow-elegant">
                 {loading ? <><Loader2 className="h-4 w-4 animate-spin me-2" />{t('auth.loading')}</> : t('auth.signIn')}
               </Button>
+              {import.meta.env.DEV && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full h-11"
+                  onClick={() => navigate('/dashboard', { replace: true })}
+                >
+                  <Sparkles className="h-4 w-4 me-2" />
+                  {t('auth.demoAccess')}
+                </Button>
+              )}
             </form>
 
             <div className="mt-6 pt-6 border-t border-border text-center">
