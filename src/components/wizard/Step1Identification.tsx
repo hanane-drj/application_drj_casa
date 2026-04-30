@@ -2,10 +2,13 @@ import { useTranslation } from 'react-i18next';
 import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import { AVAILABLE_YEARS } from '@/components/YearSwitcher';
+
+export type Milieu = 'urbain' | 'rural';
 
 export interface IdentificationData {
   prefectureName: string;
@@ -13,6 +16,7 @@ export interface IdentificationData {
   period: 'annuelle' | 'trimestrielle';
   director_name: string;
   report_date: string;
+  milieu: Milieu[];
 }
 
 interface Props {
@@ -24,6 +28,12 @@ interface Props {
 export const Step1Identification = ({ value, onChange, disabled }: Props) => {
   const { t, i18n } = useTranslation();
   const isAr = i18n.language === 'ar';
+  const milieu = value.milieu ?? [];
+
+  const toggleMilieu = (m: Milieu) => {
+    const next = milieu.includes(m) ? milieu.filter(x => x !== m) : [...milieu, m];
+    onChange({ milieu: next });
+  };
 
   return (
     <Card className="p-5 sm:p-6 space-y-5">
@@ -92,6 +102,31 @@ export const Step1Identification = ({ value, onChange, disabled }: Props) => {
             className="h-10"
             maxLength={200}
           />
+        </div>
+
+        <div className="space-y-2 sm:col-span-2">
+          <Label>{isAr ? 'الوسط' : 'Milieu'}</Label>
+          <p className="text-xs text-muted-foreground">
+            {isAr ? 'يمكن اختيار الاثنين معاً' : 'Vous pouvez sélectionner les deux'}
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <label className="flex items-center gap-2 px-3 py-2 rounded-md border border-border bg-muted/20 cursor-pointer hover:bg-muted/40 transition-smooth">
+              <Checkbox
+                checked={milieu.includes('urbain')}
+                onCheckedChange={() => toggleMilieu('urbain')}
+                disabled={disabled}
+              />
+              <span className="text-sm font-medium">{isAr ? 'حضري' : 'Urbain'}</span>
+            </label>
+            <label className="flex items-center gap-2 px-3 py-2 rounded-md border border-border bg-muted/20 cursor-pointer hover:bg-muted/40 transition-smooth">
+              <Checkbox
+                checked={milieu.includes('rural')}
+                onCheckedChange={() => toggleMilieu('rural')}
+                disabled={disabled}
+              />
+              <span className="text-sm font-medium">{isAr ? 'قروي' : 'Rural'}</span>
+            </label>
+          </div>
         </div>
       </div>
     </Card>

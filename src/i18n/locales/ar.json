@@ -41,7 +41,7 @@
     "myDirection": "مديريتي",
     "settings": "الإعدادات",
     "import": "استيراد إكسل",
-    "entry": "تعبئة 2026"
+    "entry": "تعبئة"
   },
   "roles": {
     "admin_regional": "مدير جهوي",
@@ -208,7 +208,7 @@
   },
   "form": {
     "eyebrow": "حملة {{year}}",
-    "title": "التعبئة السنوية للأنشطة",
+    "title": "تعبئة",
     "completeness": "نسبة الإكمال",
     "score": "النتيجة",
     "fieldsFilled": "حقل مُعبَّأ",

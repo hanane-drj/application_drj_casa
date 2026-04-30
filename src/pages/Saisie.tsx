@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
@@ -23,9 +23,10 @@ import { Stepper, type Step } from '@/components/form/Stepper';
 import { Step1Identification, type IdentificationData } from '@/components/wizard/Step1Identification';
 import { Step2Permanent, type AssociationEntry } from '@/components/wizard/Step2Permanent';
 import { Step3Outreach } from '@/components/wizard/Step3Outreach';
-import { Step4CampsFestivals, type CampEntry, type FestivalEntry } from '@/components/wizard/Step4CampsFestivals';
-import { Step5SocioFacilities, type SocioEcoEntry } from '@/components/wizard/Step5SocioFacilities';
-import { Step6Indicators } from '@/components/wizard/Step6Indicators';
+import { Step4Facilities } from '@/components/wizard/Step4Facilities';
+import { Step5Camping, type CampEntry } from '@/components/wizard/Step5Camping';
+import { Step6Conventions, type FestivalEntry } from '@/components/wizard/Step6Conventions';
+import { Step7SocioEco, type SocioEcoEntry } from '@/components/wizard/Step7SocioEco';
 import { usePrefName } from '@/lib/data';
 import { DEFAULT_YEAR } from '@/components/YearSwitcher';
 
@@ -33,9 +34,10 @@ const STEPS: Step[] = [
   { id: 1, labelFr: 'Identification', labelAr: 'التعريف' },
   { id: 2, labelFr: 'Permanentes', labelAr: 'الدائمة' },
   { id: 3, labelFr: 'Rayonnantes', labelAr: 'الإشعاعية' },
-  { id: 4, labelFr: 'Camping & Festivals', labelAr: 'تخييم ومهرجانات' },
-  { id: 5, labelFr: 'Socio-éco & Étab.', labelAr: 'سوسيو-اقتصادي ومؤسسات' },
-  { id: 6, labelFr: 'Commentaires & Résumé', labelAr: 'التعليقات والملخص' },
+  { id: 4, labelFr: 'Établissements', labelAr: 'المؤسسات' },
+  { id: 5, labelFr: 'Camping', labelAr: 'التخييم' },
+  { id: 6, labelFr: 'Conventions & Festivals', labelAr: 'اتفاقيات ومهرجانات' },
+  { id: 7, labelFr: 'Socio-éco & Résumé', labelAr: 'سوسيو-اقتصادي وملخص' },
 ];
 
 const Saisie = () => {
@@ -52,14 +54,19 @@ const Saisie = () => {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  // Step 1 metadata
+  // Step 1 metadata (incl. multi-select milieu — UI-only state)
   const [meta, setMeta] = useState<IdentificationData>({
     prefectureName: '',
     year: DEFAULT_YEAR,
     period: 'annuelle',
     director_name: '',
     report_date: new Date().toISOString().slice(0, 10),
+    milieu: [],
   });
+
+  // Per-step "Milieu territorial" select (UI-only state — not persisted yet)
+  const [permMilieu, setPermMilieu] = useState<'urbain' | 'rural' | ''>('');
+  const [outreachMilieu, setOutreachMilieu] = useState<'urbain' | 'rural' | ''>('');
 
   // Sync meta.year ↔ wizard year
   useEffect(() => { setMeta(m => ({ ...m, year })); }, [year]);
@@ -91,7 +98,7 @@ const Saisie = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [draft.loading, draft.submissionId]);
 
-  // Multi-entry tables
+  // Multi-entry tables (still wired to existing backend)
   const assocs = useSubmissionEntries<AssociationEntry>('submission_associations', draft.submissionId);
   const camps = useSubmissionEntries<CampEntry>('submission_camps', draft.submissionId);
   const fests = useSubmissionEntries<FestivalEntry>('submission_festivals', draft.submissionId);
@@ -127,7 +134,6 @@ const Saisie = () => {
   const isLocked = draft.status === 'soumise' || draft.status === 'validee';
 
   const handleSaveDraft = async () => {
-    // Persist meta into submissions row + child entries
     draft.update({
       ...(meta.director_name ? { director_name: meta.director_name } : {}),
       ...(meta.report_date ? { report_date: meta.report_date } : {}),
@@ -159,7 +165,6 @@ const Saisie = () => {
   };
 
   const goNext = async () => {
-    // Auto-save when moving forward
     await handleSaveDraft();
     setStep(s => Math.min(STEPS.length, s + 1));
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -177,9 +182,6 @@ const Saisie = () => {
           <div className="relative z-10 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
             <div className="space-y-2 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <Badge variant="outline" className="bg-white/15 text-white border-0 text-[10px] uppercase tracking-wider">
-                  {t('form.eyebrow', { year })}
-                </Badge>
                 {isLocked && (
                   <Badge variant="outline" className="bg-success/30 text-white border-0 gap-1">
                     <CheckCircle2 className="h-3 w-3" />
@@ -230,10 +232,8 @@ const Saisie = () => {
               <Step2Permanent
                 values={draft.values}
                 onUpdate={(p) => draft.update(p)}
-                associations={assocs.items}
-                onAddAssoc={assocs.add}
-                onUpdateAssoc={assocs.update}
-                onRemoveAssoc={assocs.remove}
+                milieu={permMilieu}
+                onMilieuChange={setPermMilieu}
                 disabled={isLocked}
               />
             )}
@@ -241,15 +241,25 @@ const Saisie = () => {
               <Step3Outreach
                 values={draft.values}
                 onUpdate={(p) => draft.update(p)}
+                milieu={outreachMilieu}
+                onMilieuChange={setOutreachMilieu}
                 disabled={isLocked}
               />
             )}
             {step === 4 && (
-              <Step4CampsFestivals
+              <Step4Facilities disabled={isLocked} />
+            )}
+            {step === 5 && (
+              <Step5Camping
                 camps={camps.items}
                 onAddCamp={camps.add}
                 onUpdateCamp={camps.update}
                 onRemoveCamp={camps.remove}
+                disabled={isLocked}
+              />
+            )}
+            {step === 6 && (
+              <Step6Conventions
                 festivals={fests.items}
                 onAddFestival={fests.add}
                 onUpdateFestival={fests.update}
@@ -257,21 +267,14 @@ const Saisie = () => {
                 disabled={isLocked}
               />
             )}
-            {step === 5 && (
-              <Step5SocioFacilities
+            {step === 7 && (
+              <Step7SocioEco
                 values={draft.values}
                 onUpdate={(p) => draft.update(p)}
                 socioeco={socios.items}
                 onAddSocio={socios.add}
                 onUpdateSocio={socios.update}
                 onRemoveSocio={socios.remove}
-                disabled={isLocked}
-              />
-            )}
-            {step === 6 && (
-              <Step6Indicators
-                values={draft.values}
-                onUpdate={(p) => draft.update(p)}
                 completeness={draft.completeness}
                 globalScore={draft.globalScore}
                 disabled={isLocked}
