@@ -9,6 +9,7 @@ import "./i18n";
 
 import Index from "./pages/Index.tsx";
 import Auth from "./pages/Auth.tsx";
+import ForgotPassword from "./pages/ForgotPassword.tsx";
 import Dashboard from "./pages/Dashboard.tsx";
 import Directions from "./pages/Directions.tsx";
 import DirectionDetail from "./pages/DirectionDetail.tsx";
@@ -30,6 +31,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/directions" element={<ProtectedRoute><Directions /></ProtectedRoute>} />
             <Route path="/directions/:id" element={<ProtectedRoute><DirectionDetail /></ProtectedRoute>} />
