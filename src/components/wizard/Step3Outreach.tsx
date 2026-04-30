@@ -1,17 +1,21 @@
 import { useTranslation } from 'react-i18next';
 import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from '@/components/ui/select';
 import { NumericField } from '@/components/form/NumericField';
 import type { DraftValues } from '@/hooks/useDraftSubmission';
 
 interface Props {
   values: DraftValues;
   onUpdate: (patch: DraftValues) => void;
+  milieu: 'urbain' | 'rural' | '';
+  onMilieuChange: (m: 'urbain' | 'rural' | '') => void;
   disabled?: boolean;
 }
 
-export const Step3Outreach = ({ values, onUpdate, disabled }: Props) => {
+export const Step3Outreach = ({ values, onUpdate, milieu, onMilieuChange, disabled }: Props) => {
   const { i18n } = useTranslation();
   const isAr = i18n.language === 'ar';
 
@@ -23,47 +27,53 @@ export const Step3Outreach = ({ values, onUpdate, disabled }: Props) => {
             {isAr ? 'الأنشطة الإشعاعية' : 'Activités rayonnantes'}
           </h2>
           <p className="text-sm text-muted-foreground">
-            {isAr ? 'المستفيدون حسب نوع النشاط' : 'Bénéficiaires par type d’activité'}
+            {isAr ? 'الأنشطة الإشعاعية حسب النوع' : 'Activités rayonnantes par type'}
           </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-1.5">
+            <Label>{isAr ? 'الوسط الترابي' : 'Milieu territorial'}</Label>
+            <Select
+              value={milieu || undefined}
+              onValueChange={v => onMilieuChange(v as 'urbain' | 'rural')}
+              disabled={disabled}
+            >
+              <SelectTrigger className="h-10">
+                <SelectValue placeholder={isAr ? 'اختر' : 'Choisir'} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="urbain">{isAr ? 'حضري' : 'Urbain'}</SelectItem>
+                <SelectItem value="rural">{isAr ? 'قروي' : 'Rural'}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <NumericField
-            label={isAr ? 'المستفيدون التربويون' : 'Bénéficiaires éducatifs'}
+            label={isAr ? 'الأنشطة التربوية' : 'Activités éducatives'}
             value={Number(values.outreach_educative ?? 0)}
             onChange={v => onUpdate({ outreach_educative: v })}
             disabled={disabled}
           />
           <NumericField
-            label={isAr ? 'المستفيدون الثقافيون' : 'Bénéficiaires culturels'}
+            label={isAr ? 'الأنشطة الثقافية والفنية' : 'Activités culturelles et artistiques'}
             value={Number(values.outreach_cultural ?? 0)}
             onChange={v => onUpdate({ outreach_cultural: v })}
             disabled={disabled}
           />
           <NumericField
-            label={isAr ? 'المستفيدون الرياضيون' : 'Bénéficiaires sportifs'}
+            label={isAr ? 'الأنشطة الترفيهية والبدنية' : 'Activités récréatives et physiques'}
             value={Number(values.outreach_sportive ?? 0)}
             onChange={v => onUpdate({ outreach_sportive: v })}
             disabled={disabled}
           />
           <NumericField
-            label={isAr ? 'تعزيز القدرات' : 'Renforcement capacités'}
+            label={isAr ? 'تعزيز القدرات' : 'Renforcement des capacités'}
             value={Number(values.outreach_capacity ?? 0)}
             onChange={v => onUpdate({ outreach_capacity: v })}
             disabled={disabled}
-          />
-        </div>
-
-        <div className="space-y-1.5">
-          <Label className="text-xs font-medium text-muted-foreground">
-            {isAr ? 'ملاحظات' : 'Notes'}
-          </Label>
-          <Textarea
-            value={(values.comments ?? '').toString()}
-            onChange={e => onUpdate({ comments: e.target.value.slice(0, 5000) })}
-            disabled={disabled}
-            rows={3}
-            placeholder={isAr ? 'ملاحظات حول الأنشطة الإشعاعية…' : 'Notes sur les activités rayonnantes…'}
           />
         </div>
       </Card>
