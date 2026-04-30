@@ -208,7 +208,7 @@
   },
   "form": {
     "eyebrow": "حملة {{year}}",
-    "title": "التعبئة السنوية للأنشطة",
+    "title": "تعبئة",
     "completeness": "نسبة الإكمال",
     "score": "النتيجة",
     "fieldsFilled": "حقل مُعبَّأ",

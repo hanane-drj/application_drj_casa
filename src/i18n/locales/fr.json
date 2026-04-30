@@ -208,7 +208,7 @@
   },
   "form": {
     "eyebrow": "Campagne {{year}}",
-    "title": "Saisie annuelle des activités",
+    "title": "Saisie",
     "completeness": "Complétude",
     "score": "Score",
     "fieldsFilled": "champs renseignés",
