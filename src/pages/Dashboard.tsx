@@ -19,6 +19,10 @@ import { computeTotalBeneficiaries, formatNumber, formatDate, usePrefName } from
 import { exportDashboardCsv, exportDashboardPdf } from '@/lib/export';
 import { exportDashboardXlsx } from '@/lib/excelExport';
 import { YearSwitcher, DEFAULT_YEAR } from '@/components/YearSwitcher';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Filter } from 'lucide-react';
+
+const TOTAL_DIRECTIONS = 13;
 
 const STATUS_STYLE: Record<string, string> = {
   validee: 'bg-success/15 text-success border-success/30',
@@ -41,6 +45,9 @@ const Dashboard = () => {
   const [prefectures, setPrefectures] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [year, setYear] = useState<number>(DEFAULT_YEAR);
+  const [filterQuarter, setFilterQuarter] = useState<string>('all');
+  const [filterDomain, setFilterDomain] = useState<string>('jeunesse');
+  const [filterDirection, setFilterDirection] = useState<string>('all');
 
   useEffect(() => {
     setLoading(true);
@@ -102,7 +109,7 @@ const Dashboard = () => {
     { name: t('detail.integration'), value: submissions.reduce((a, s) => a + (s.integration_beneficiaries ?? 0), 0), color: 'hsl(var(--success))' },
   ];
 
-  const totalPrefs = isDirector ? 1 : (prefectures.length || 13);
+  const totalPrefs = TOTAL_DIRECTIONS;
   const KPIS = [
     { icon: Building2, label: t('dashboard.kpi.submitted'), value: `${submitted}/${totalPrefs}`, tone: 1 },
     { icon: TrendingUp, label: t('dashboard.kpi.completeness'), value: `${avgCompleteness.toFixed(1)}%`, tone: 2 },
