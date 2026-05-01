@@ -86,18 +86,18 @@ const Dashboard = () => {
     ? filteredSubmissions.reduce((a, s) => a + Number(s.completeness_pct ?? 0), 0) / filteredSubmissions.length
     : 0;
 
-  const totalBeneficiaries = submissions.reduce((a, s) => a + computeTotalBeneficiaries(s), 0);
-  const totalAssoc = submissions.reduce((a, s) => a + (s.perm_associations ?? 0), 0);
-  const totalConv = submissions.reduce((a, s) => a + (s.perm_conventions ?? 0), 0);
-  const totalClubs = submissions.reduce((a, s) => a + (s.perm_clubs ?? 0), 0);
-  const totalTrainings = submissions.reduce((a, s) => a + (s.integration_trainings ?? 0) + (s.camping_trainings ?? 0), 0);
-  const totalFestivals = submissions.reduce((a, s) => a + (s.festivals_participants ?? 0), 0);
-  const totalCamping = submissions.reduce((a, s) => a + (s.camping_participants ?? 0), 0);
+  const totalBeneficiaries = filteredSubmissions.reduce((a, s) => a + computeTotalBeneficiaries(s), 0);
+  const totalAssoc = filteredSubmissions.reduce((a, s) => a + (s.perm_associations ?? 0), 0);
+  const totalConv = filteredSubmissions.reduce((a, s) => a + (s.perm_conventions ?? 0), 0);
+  const totalClubs = filteredSubmissions.reduce((a, s) => a + (s.perm_clubs ?? 0), 0);
+  const totalTrainings = filteredSubmissions.reduce((a, s) => a + (s.integration_trainings ?? 0) + (s.camping_trainings ?? 0), 0);
+  const totalFestivals = filteredSubmissions.reduce((a, s) => a + (s.festivals_participants ?? 0), 0);
+  const totalCamping = filteredSubmissions.reduce((a, s) => a + (s.camping_participants ?? 0), 0);
 
   const prefMap = new Map(prefectures.map(p => [p.id, p]));
 
   // Ranking
-  const ranking = [...submissions]
+  const ranking = [...filteredSubmissions]
     .map(s => ({
       ...s,
       pref: prefMap.get(s.prefecture_id),
@@ -107,11 +107,11 @@ const Dashboard = () => {
     .sort((a, b) => Number(b.global_score) - Number(a.global_score));
 
   const programData = [
-    { name: t('detail.permanent'), value: submissions.reduce((a, s) => a + (s.perm_educative + s.perm_cultural + s.perm_sportive + s.perm_capacity), 0), color: 'hsl(var(--primary))' },
-    { name: t('detail.outreach'), value: submissions.reduce((a, s) => a + (s.outreach_educative + s.outreach_cultural + s.outreach_sportive + s.outreach_capacity), 0), color: 'hsl(var(--primary-glow))' },
+    { name: t('detail.permanent'), value: filteredSubmissions.reduce((a, s) => a + (s.perm_educative + s.perm_cultural + s.perm_sportive + s.perm_capacity), 0), color: 'hsl(var(--primary))' },
+    { name: t('detail.outreach'), value: filteredSubmissions.reduce((a, s) => a + (s.outreach_educative + s.outreach_cultural + s.outreach_sportive + s.outreach_capacity), 0), color: 'hsl(var(--primary-glow))' },
     { name: t('detail.camping'), value: totalCamping, color: 'hsl(var(--secondary))' },
     { name: t('detail.festivals'), value: totalFestivals, color: 'hsl(var(--info))' },
-    { name: t('detail.integration'), value: submissions.reduce((a, s) => a + (s.integration_beneficiaries ?? 0), 0), color: 'hsl(var(--success))' },
+    { name: t('detail.integration'), value: filteredSubmissions.reduce((a, s) => a + (s.integration_beneficiaries ?? 0), 0), color: 'hsl(var(--success))' },
   ];
 
   const totalPrefs = TOTAL_DIRECTIONS;
