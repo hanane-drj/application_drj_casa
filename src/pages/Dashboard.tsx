@@ -76,9 +76,14 @@ const Dashboard = () => {
     );
   }
 
-  const submitted = submissions.filter(s => s.status !== 'brouillon').length;
-  const avgCompleteness = submissions.length
-    ? submissions.reduce((a, s) => a + Number(s.completeness_pct ?? 0), 0) / submissions.length
+  // Apply UI filters (Direction filter applies to data; Quarter/Domain are UI-only for now)
+  const filteredSubmissions = submissions.filter(s =>
+    filterDirection === 'all' ? true : s.prefecture_id === filterDirection
+  );
+
+  const submitted = filteredSubmissions.filter(s => s.status !== 'brouillon').length;
+  const avgCompleteness = filteredSubmissions.length
+    ? filteredSubmissions.reduce((a, s) => a + Number(s.completeness_pct ?? 0), 0) / filteredSubmissions.length
     : 0;
 
   const totalBeneficiaries = submissions.reduce((a, s) => a + computeTotalBeneficiaries(s), 0);
