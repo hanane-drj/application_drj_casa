@@ -172,16 +172,84 @@ const Dashboard = () => {
           <div className="absolute -bottom-8 -start-8 w-40 h-40 rounded-full bg-primary-glow/40 blur-2xl" />
         </div>
 
+
+        {/* Filters */}
+        <Card className="p-4 sm:p-5">
+          <div className="flex items-center gap-2 mb-3">
+            <Filter className="h-4 w-4 text-primary" />
+            <h3 className="text-sm font-bold">{t('dashboard.filters', 'Filtres')}</h3>
+          </div>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="space-y-1">
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
+                {t('common.year', 'Année')}
+              </span>
+              <Select value={String(year)} onValueChange={v => setYear(Number(v))}>
+                <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {[DEFAULT_YEAR, DEFAULT_YEAR - 1, DEFAULT_YEAR - 2].map(y =>
+                    <SelectItem key={y} value={String(y)}>{y}</SelectItem>
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1">
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
+                Trimestre
+              </span>
+              <Select value={filterQuarter} onValueChange={setFilterQuarter}>
+                <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tous</SelectItem>
+                  <SelectItem value="T1">T1</SelectItem>
+                  <SelectItem value="T2">T2</SelectItem>
+                  <SelectItem value="T3">T3</SelectItem>
+                  <SelectItem value="T4">T4</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1">
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
+                Domaine
+              </span>
+              <Select value={filterDomain} onValueChange={setFilterDomain}>
+                <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="jeunesse">Jeunesse</SelectItem>
+                  <SelectItem value="femme" disabled>Femme / Fille</SelectItem>
+                  <SelectItem value="enfants" disabled>Enfants</SelectItem>
+                  <SelectItem value="creche" disabled>Crèche</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1">
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
+                Direction
+              </span>
+              <Select value={filterDirection} onValueChange={setFilterDirection} disabled={isDirector}>
+                <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Toutes</SelectItem>
+                  {prefectures.map(p => (
+                    <SelectItem key={p.id} value={p.id}>{getName(p)}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </Card>
+
         {/* KPI Grid — palette catégorielle */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
           {KPIS.map((k, i) => {
             const Icon = k.icon;
+            const isSubmittedKpi = i === 0;
+            const submittedPct = totalPrefs > 0 ? Math.min(100, Math.round((submitted / totalPrefs) * 100)) : 0;
             return (
               <Card
                 key={i}
                 className="relative p-4 sm:p-5 border-border/60 hover:shadow-elegant transition-smooth hover:-translate-y-0.5 overflow-hidden bg-card"
               >
-                {/* Barre d'accent verticale */}
                 <span
                   className="absolute inset-y-0 start-0 w-1"
                   style={{ background: `hsl(var(--kpi-${k.tone}))` }}
@@ -202,6 +270,12 @@ const Dashboard = () => {
                   {k.value}
                 </div>
                 <div className="text-xs text-muted-foreground mt-1 leading-tight">{k.label}</div>
+                {isSubmittedKpi && (
+                  <div className="mt-3 space-y-1">
+                    <Progress value={submittedPct} className="h-1.5" />
+                    <div className="text-[10px] text-muted-foreground tabular-nums">{submittedPct}%</div>
+                  </div>
+                )}
               </Card>
             );
           })}
