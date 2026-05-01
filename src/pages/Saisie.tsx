@@ -8,37 +8,49 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import {
-  ChevronLeft, ChevronRight, Save, Send, ShieldAlert, Loader2, CheckCircle2,
+  ChevronLeft, ChevronRight, Save, Send, ShieldAlert, Loader2, CheckCircle2, Pencil,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useDraftSubmission } from '@/hooks/useDraftSubmission';
 import { useSubmissionEntries } from '@/hooks/useSubmissionEntries';
 import { SaveIndicator } from '@/components/form/SaveIndicator';
 import { Stepper, type Step } from '@/components/form/Stepper';
-import { Step1Identification, type IdentificationData } from '@/components/wizard/Step1Identification';
 import { Step2Permanent, type AssociationEntry } from '@/components/wizard/Step2Permanent';
 import { Step3Outreach } from '@/components/wizard/Step3Outreach';
 import { Step4Facilities } from '@/components/wizard/Step4Facilities';
 import { Step5Camping, type CampEntry } from '@/components/wizard/Step5Camping';
-import { Step6Conventions, type FestivalEntry } from '@/components/wizard/Step6Conventions';
-import { Step7SocioEco, type SocioEcoEntry } from '@/components/wizard/Step7SocioEco';
+import { StepConventionsOnly } from '@/components/wizard/StepConventionsOnly';
+import { StepFestivalsOnly, type FestivalEntry } from '@/components/wizard/StepFestivalsOnly';
+import { StepSocioEcoOnly, type SocioEcoEntry } from '@/components/wizard/StepSocioEcoOnly';
+import { StepCommentsSummary } from '@/components/wizard/StepCommentsSummary';
+import { PreFormSelection, type ReportSelection } from '@/components/wizard/PreFormSelection';
 import { usePrefName } from '@/lib/data';
 import { DEFAULT_YEAR } from '@/components/YearSwitcher';
 
 const STEPS: Step[] = [
-  { id: 1, labelFr: 'Identification', labelAr: 'التعريف' },
-  { id: 2, labelFr: 'Permanentes', labelAr: 'الدائمة' },
-  { id: 3, labelFr: 'Rayonnantes', labelAr: 'الإشعاعية' },
-  { id: 4, labelFr: 'Établissements', labelAr: 'المؤسسات' },
-  { id: 5, labelFr: 'Camping', labelAr: 'التخييم' },
-  { id: 6, labelFr: 'Conventions & Festivals', labelAr: 'اتفاقيات ومهرجانات' },
-  { id: 7, labelFr: 'Socio-éco & Résumé', labelAr: 'سوسيو-اقتصادي وملخص' },
+  { id: 1, labelFr: 'Permanentes', labelAr: 'الدائمة' },
+  { id: 2, labelFr: 'Rayonnantes', labelAr: 'الإشعاعية' },
+  { id: 3, labelFr: 'Établissements', labelAr: 'المؤسسات' },
+  { id: 4, labelFr: 'Camping', labelAr: 'التخييم' },
+  { id: 5, labelFr: 'Conventions', labelAr: 'الاتفاقيات' },
+  { id: 6, labelFr: 'Festivals', labelAr: 'المهرجانات' },
+  { id: 7, labelFr: 'Socio-éco', labelAr: 'سوسيو-اقتصادي' },
+  { id: 8, labelFr: 'Résumé', labelAr: 'الملخص' },
 ];
+
+const DOMAIN_LABEL: Record<string, { fr: string; ar: string }> = {
+  jeunesse: { fr: 'Jeunesse', ar: 'الشباب' },
+  femme: { fr: 'Femme / Fille', ar: 'المرأة / الفتاة' },
+  enfants: { fr: 'Enfants', ar: 'الأطفال' },
+  creche: { fr: 'Crèche', ar: 'الحضانة' },
+};
 
 const Saisie = () => {
   const { t, i18n } = useTranslation();
@@ -48,57 +60,48 @@ const Saisie = () => {
   const getName = usePrefName();
   const isAr = i18n.language === 'ar';
 
-  const [year, setYear] = useState<number>(DEFAULT_YEAR);
+  // Pre-form selection
+  const [selectionDone, setSelectionDone] = useState(false);
+  const [selection, setSelection] = useState<ReportSelection>({
+    year: DEFAULT_YEAR,
+    type: 'annuel',
+    domain: 'jeunesse',
+  });
+
   const [pref, setPref] = useState<any>(null);
   const [step, setStep] = useState<number>(1);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  // Step 1 metadata (incl. multi-select milieu — UI-only state)
-  const [meta, setMeta] = useState<IdentificationData>({
-    prefectureName: '',
-    year: DEFAULT_YEAR,
-    period: 'annuelle',
-    director_name: '',
-    report_date: new Date().toISOString().slice(0, 10),
-    milieu: [],
-  });
+  // Identification metadata (director_name, report_date) — persisted with draft
+  const [directorName, setDirectorName] = useState('');
+  const [reportDate, setReportDate] = useState(new Date().toISOString().slice(0, 10));
 
-  // Per-step "Milieu territorial" select (UI-only state — not persisted yet)
+  // Per-step "Milieu territorial"
   const [permMilieu, setPermMilieu] = useState<'urbain' | 'rural' | ''>('');
   const [outreachMilieu, setOutreachMilieu] = useState<'urbain' | 'rural' | ''>('');
-
-  // Sync meta.year ↔ wizard year
-  useEffect(() => { setMeta(m => ({ ...m, year })); }, [year]);
 
   useEffect(() => {
     if (!profile?.prefecture_id) return;
     supabase.from('prefectures').select('*').eq('id', profile.prefecture_id).maybeSingle()
-      .then(({ data }) => {
-        setPref(data);
-        if (data) setMeta(m => ({ ...m, prefectureName: getName(data) }));
-      });
-  }, [profile?.prefecture_id, getName]);
+      .then(({ data }) => setPref(data));
+  }, [profile?.prefecture_id]);
 
   const draft = useDraftSubmission({
     prefectureId: profile?.prefecture_id ?? '',
-    year,
+    year: selection.year,
     userId: profile?.id ?? '',
   });
 
-  // Hydrate meta from draft once loaded
+  // Hydrate identification fields from draft once loaded
   useEffect(() => {
     if (draft.loading) return;
-    setMeta(m => ({
-      ...m,
-      director_name: (draft.values as any).director_name ?? m.director_name,
-      report_date: (draft.values as any).report_date ?? m.report_date,
-      period: (draft.values as any).period ?? m.period,
-    }));
+    const v: any = draft.values;
+    if (v.director_name) setDirectorName(v.director_name);
+    if (v.report_date) setReportDate(v.report_date);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [draft.loading, draft.submissionId]);
 
-  // Multi-entry tables (still wired to existing backend)
   const assocs = useSubmissionEntries<AssociationEntry>('submission_associations', draft.submissionId);
   const camps = useSubmissionEntries<CampEntry>('submission_camps', draft.submissionId);
   const fests = useSubmissionEntries<FestivalEntry>('submission_festivals', draft.submissionId);
@@ -131,13 +134,39 @@ const Saisie = () => {
     );
   }
 
+  // PRE-FORM SELECTION FLOW (Stages 1 & 2)
+  if (!selectionDone) {
+    return (
+      <AppLayout>
+        <div className="space-y-5 sm:space-y-6 animate-fade-in" dir={isAr ? 'rtl' : 'ltr'}>
+          <div className="relative overflow-hidden rounded-2xl gradient-hero p-5 sm:p-7 text-primary-foreground shadow-elegant">
+            <div className="relative z-10">
+              <h1 className="text-2xl sm:text-3xl font-extrabold leading-tight">{t('form.title')}</h1>
+              {pref && <p className="text-sm sm:text-base opacity-90 mt-1">{getName(pref)}</p>}
+            </div>
+            <div className="absolute -top-12 -end-12 w-48 h-48 rounded-full bg-secondary/30 blur-3xl" />
+          </div>
+          <PreFormSelection
+            initial={selection}
+            onComplete={(sel) => { setSelection(sel); setSelectionDone(true); }}
+          />
+        </div>
+      </AppLayout>
+    );
+  }
+
   const isLocked = draft.status === 'soumise' || draft.status === 'validee';
+
+  const periodLabel = selection.type === 'annuel'
+    ? (isAr ? 'سنوي' : 'Annuel')
+    : `${isAr ? 'فصلي' : 'Trimestriel'} · ${selection.quarter ?? ''}`;
+  const domainLabel = DOMAIN_LABEL[selection.domain]?.[isAr ? 'ar' : 'fr'] ?? selection.domain;
 
   const handleSaveDraft = async () => {
     draft.update({
-      ...(meta.director_name ? { director_name: meta.director_name } : {}),
-      ...(meta.report_date ? { report_date: meta.report_date } : {}),
-      period: meta.period,
+      ...(directorName ? { director_name: directorName } : {}),
+      ...(reportDate ? { report_date: reportDate } : {}),
+      period: selection.type === 'annuel' ? 'annuelle' : 'trimestrielle',
     } as any);
     const ok = await draft.saveNow();
     if (ok && draft.submissionId) await persistAllChildren(draft.submissionId);
@@ -148,16 +177,16 @@ const Saisie = () => {
   const handleSubmit = async () => {
     setSubmitting(true);
     draft.update({
-      ...(meta.director_name ? { director_name: meta.director_name } : {}),
-      ...(meta.report_date ? { report_date: meta.report_date } : {}),
-      period: meta.period,
+      ...(directorName ? { director_name: directorName } : {}),
+      ...(reportDate ? { report_date: reportDate } : {}),
+      period: selection.type === 'annuel' ? 'annuelle' : 'trimestrielle',
     } as any);
     const ok = await draft.submit();
     if (ok && draft.submissionId) await persistAllChildren(draft.submissionId);
     setSubmitting(false);
     setConfirmOpen(false);
     if (ok) {
-      toast({ title: t('form.submit.successTitle'), description: t('form.submit.successBody', { year }) });
+      toast({ title: t('form.submit.successTitle'), description: t('form.submit.successBody', { year: selection.year }) });
       setTimeout(() => navigate('/dashboard'), 800);
     } else {
       toast({ title: t('form.submit.errorTitle'), description: draft.errorMsg ?? '', variant: 'destructive' });
@@ -173,6 +202,8 @@ const Saisie = () => {
     setStep(s => Math.max(1, s - 1));
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  const totalActivities = socios.items.length;
 
   return (
     <AppLayout>
@@ -195,6 +226,52 @@ const Saisie = () => {
           </div>
           <div className="absolute -top-12 -end-12 w-48 h-48 rounded-full bg-secondary/30 blur-3xl" />
         </div>
+
+        {/* Selection summary */}
+        <Card className="p-4 sm:p-5 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant="outline" className="gap-1.5">
+              <span className="text-muted-foreground">{isAr ? 'السنة' : 'Année'}:</span>
+              <span className="font-bold tabular-nums">{selection.year}</span>
+            </Badge>
+            <Badge variant="outline" className="gap-1.5">
+              <span className="text-muted-foreground">{isAr ? 'النوع' : 'Type'}:</span>
+              <span className="font-bold">{periodLabel}</span>
+            </Badge>
+            <Badge variant="outline" className="gap-1.5">
+              <span className="text-muted-foreground">{isAr ? 'المجال' : 'Domaine'}:</span>
+              <span className="font-bold">{domainLabel}</span>
+            </Badge>
+          </div>
+          <Button variant="ghost" size="sm" onClick={() => setSelectionDone(false)} className="gap-1.5">
+            <Pencil className="h-3.5 w-3.5" />
+            {isAr ? 'تعديل' : 'Modifier'}
+          </Button>
+        </Card>
+
+        {/* Identification (compact) */}
+        <Card className="p-4 sm:p-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="space-y-1.5">
+            <Label className="text-xs font-medium">{isAr ? 'اسم المدير(ة)' : 'Nom du directeur(trice)'}</Label>
+            <Input
+              value={directorName}
+              maxLength={200}
+              onChange={e => setDirectorName(e.target.value.slice(0, 200))}
+              disabled={isLocked}
+              className="h-9"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs font-medium">{isAr ? 'تاريخ التقرير' : 'Date du rapport'}</Label>
+            <Input
+              type="date"
+              value={reportDate}
+              onChange={e => setReportDate(e.target.value)}
+              disabled={isLocked}
+              className="h-9"
+            />
+          </div>
+        </Card>
 
         {/* Stepper */}
         <Card className="p-4 sm:p-5">
@@ -219,16 +296,6 @@ const Saisie = () => {
         ) : (
           <>
             {step === 1 && (
-              <Step1Identification
-                value={meta}
-                onChange={(p) => {
-                  setMeta(m => ({ ...m, ...p }));
-                  if (p.year && p.year !== year) setYear(p.year);
-                }}
-                disabled={isLocked}
-              />
-            )}
-            {step === 2 && (
               <Step2Permanent
                 values={draft.values}
                 onUpdate={(p) => draft.update(p)}
@@ -237,7 +304,7 @@ const Saisie = () => {
                 disabled={isLocked}
               />
             )}
-            {step === 3 && (
+            {step === 2 && (
               <Step3Outreach
                 values={draft.values}
                 onUpdate={(p) => draft.update(p)}
@@ -246,10 +313,10 @@ const Saisie = () => {
                 disabled={isLocked}
               />
             )}
-            {step === 4 && (
+            {step === 3 && (
               <Step4Facilities disabled={isLocked} />
             )}
-            {step === 5 && (
+            {step === 4 && (
               <Step5Camping
                 camps={camps.items}
                 onAddCamp={camps.add}
@@ -258,8 +325,11 @@ const Saisie = () => {
                 disabled={isLocked}
               />
             )}
+            {step === 5 && (
+              <StepConventionsOnly disabled={isLocked} />
+            )}
             {step === 6 && (
-              <Step6Conventions
+              <StepFestivalsOnly
                 festivals={fests.items}
                 onAddFestival={fests.add}
                 onUpdateFestival={fests.update}
@@ -268,15 +338,21 @@ const Saisie = () => {
               />
             )}
             {step === 7 && (
-              <Step7SocioEco
-                values={draft.values}
-                onUpdate={(p) => draft.update(p)}
+              <StepSocioEcoOnly
                 socioeco={socios.items}
                 onAddSocio={socios.add}
                 onUpdateSocio={socios.update}
                 onRemoveSocio={socios.remove}
+                disabled={isLocked}
+              />
+            )}
+            {step === 8 && (
+              <StepCommentsSummary
+                values={draft.values}
+                onUpdate={(p) => draft.update(p)}
                 completeness={draft.completeness}
                 globalScore={draft.globalScore}
+                activitiesCount={totalActivities}
                 disabled={isLocked}
               />
             )}
@@ -286,26 +362,15 @@ const Saisie = () => {
         {/* Bottom action bar */}
         <div className="fixed bottom-0 inset-x-0 z-40 bg-card/95 backdrop-blur border-t border-border">
           <div className="container py-3 flex items-center justify-between gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={goPrev}
-              disabled={step === 1}
-              className="gap-1.5"
-            >
+            <Button variant="outline" size="sm" onClick={goPrev} disabled={step === 1} className="gap-1.5">
               {isAr ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
               <span className="hidden sm:inline">{t('common.previous')}</span>
             </Button>
 
             <div className="flex items-center gap-2">
               {!isLocked && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleSaveDraft}
-                  disabled={draft.saveState === 'saving'}
-                  className="gap-1.5"
-                >
+                <Button variant="outline" size="sm" onClick={handleSaveDraft}
+                  disabled={draft.saveState === 'saving'} className="gap-1.5">
                   {draft.saveState === 'saving' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                   <span className="hidden sm:inline">{t('form.actions.saveDraft')}</span>
                 </Button>
@@ -318,12 +383,8 @@ const Saisie = () => {
                 </Button>
               ) : (
                 !isLocked && (
-                  <Button
-                    size="sm"
-                    onClick={() => setConfirmOpen(true)}
-                    disabled={draft.saveState === 'saving' || submitting}
-                    className="gap-1.5"
-                  >
+                  <Button size="sm" onClick={() => setConfirmOpen(true)}
+                    disabled={draft.saveState === 'saving' || submitting} className="gap-1.5">
                     <Send className="h-4 w-4" />
                     {t('form.actions.submit')}
                   </Button>
@@ -338,7 +399,7 @@ const Saisie = () => {
             <AlertDialogHeader>
               <AlertDialogTitle>{t('form.confirm.title')}</AlertDialogTitle>
               <AlertDialogDescription>
-                {t('form.confirm.body', { year, completeness: draft.completeness })}
+                {t('form.confirm.body', { year: selection.year, completeness: draft.completeness })}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
